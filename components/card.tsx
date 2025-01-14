@@ -4,6 +4,7 @@ interface CardData {
   images: [string];
   carats: number;
   shape_code: string;
+  color_code: string;
   price_total: any;
 }
 
@@ -16,7 +17,7 @@ export default function Card({ data }: Props) {
     <View>
       <View>
         <Text className="text-center text-white font-normal py-4">
-          {data.carats} Carat {data.shape_code} Diamond
+          {data.carats} Carat {data.shape_code} Diamond {data.color_code} Color
         </Text>
       </View>
       <View className="flex justify-center items-center w-full text-white">

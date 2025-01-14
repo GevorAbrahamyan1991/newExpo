@@ -1,10 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
+import useStore from "@/stores/store";
 
 type Props = {
-  url: string;
+  baseUrl: string;
 };
 
-function useFetchData({ url }: Props) {
+function useFetchData({ baseUrl }: Props) {
+  const { filters } = useStore();
+
+  const queryString = Object.entries(filters)
+    .map(([key, value]) => `${key}=${value}`)
+    .join("&");
+
+  const url = `${baseUrl}?${queryString}`;
+
   return useQuery(["fetchData", url], async () => {
     const response = await fetch(url);
     if (!response.ok) {

@@ -6,15 +6,11 @@ import useStore from "@/stores/store";
 import { Picker } from "@react-native-picker/picker";
 
 export default function Diamonds() {
-  const { shapeCode, setShapeCode } = useStore();
+  const { filters, setFilter, resetFilters } = useStore();
   const { isLoading, error, data } = useFetchData({
-    url: `https://api-staging.wdpro.app/api/stones.json?company_id=2&page=1&sort_by=&sort_dir=&carats_max=&carats_min=&depth_max=&depth_min=&description=&price_max=&price_min=&stone_type=&table_max=&table_min=&clarity=&color=&cut=&fluorescence=&lab=&polish=&shape=${shapeCode}&symmetry=`,
+    baseUrl: "https://api-staging.wdpro.app/api/stones.json",
   });
-
-  const handleSelectShape = (code: string) => {
-    setShapeCode(code);
-  };
-
+  console.log(data);
   return (
     <View>
       {isLoading ? (
@@ -27,15 +23,24 @@ export default function Diamonds() {
             </Text>
             <View style={styles.container}>
               <Picker
-                selectedValue={shapeCode}
+                selectedValue={filters.shape || ""}
                 style={styles.picker}
-                onValueChange={handleSelectShape}
+                onValueChange={(value) => setFilter("shape", value)}
               >
                 <Picker.Item label="CU" value="CU" />
                 <Picker.Item label="RD" value="RD" />
                 <Picker.Item label="RA" value="RA" />
                 <Picker.Item label="PR" value="PR" />
               </Picker>
+              <Picker
+                selectedValue={filters.color || ""}
+                style={styles.picker}
+                onValueChange={(value) => setFilter("color", value)}
+              >
+                <Picker.Item label="K" value="K" />
+                <Picker.Item label="F" value="F" />
+              </Picker>
+              <Button title="Reset Filters" onPress={resetFilters} />
             </View>
             <View className="grid grid-cols-1 py-12">
               {data.data.map((item: object, index: Key | null | undefined) => {
@@ -61,5 +66,7 @@ const styles = StyleSheet.create({
     width: 150,
     backgroundColor: "#e2e8f0",
     color: "black",
+    marginTop: 10,
+    marginBottom: 10,
   },
 });
