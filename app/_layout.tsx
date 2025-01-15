@@ -10,6 +10,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import "../global.css";
+import { PaperProvider } from "react-native-paper";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
 
@@ -39,11 +40,13 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <QueryClientProvider client={queryClient}>
-        <Stack>
-          {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
+        <PaperProvider>
+          <Stack>
+            {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+        </PaperProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

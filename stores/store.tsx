@@ -25,13 +25,27 @@ const initialFilters = {
   symmetry: "",
 };
 
-const useStore = create((set) => ({
+interface Store {
+  filters: typeof initialFilters;
+  setFilter: (key: keyof typeof initialFilters, value: string) => void;
+  setFilters: (newFilters: Partial<typeof initialFilters>) => void;
+  resetFilters: () => void;
+}
+
+const useStore = create<Store>((set) => ({
   filters: { ...initialFilters },
-  setFilter: (key, value) =>
-    set((state) => ({
+  setFilter: (key: keyof typeof initialFilters, value: string) =>
+    set((state: any) => ({
       filters: {
         ...state.filters,
         [key]: value,
+      },
+    })),
+  setFilters: (newFilters: Partial<typeof initialFilters>) =>
+    set((state: any) => ({
+      filters: {
+        ...state.filters,
+        ...newFilters,
       },
     })),
   resetFilters: () =>
