@@ -1,7 +1,8 @@
 import useFetchData from "@/hooks/useFetchData";
 import useStore from "@/stores/store";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { PaperSelect } from "react-native-paper-select";
+import { useTailwind } from "tailwind-rn";
 
 interface Props {
   filter: string;
@@ -23,9 +24,18 @@ export default function MultiSelect({ filter, multiple }: Props) {
   const selectedArrayList = Array.isArray(filters[filter])
     ? transformedArray.filter(({ value }) => filters[filter].includes(value))
     : [];
+  const tailwind = useTailwind();
+
+  // const styles = {
+  //   paperSelect: tailwind("bg-red-900 w-24 opacity-50"),
+  // };
+
   return (
-    <View>
+    <View className="" style={tailwind("")}>
       <PaperSelect
+        dialogStyle={tailwind("w-64")}
+        textInputStyle={tailwind("w-64")}
+        // theme={{ colors: { primary: "red", secondary: "green" } }}
         label={`Select ${filter}`}
         value={Array.isArray(filters[filter]) ? filters[filter].join(", ") : ""}
         onSelection={(value) => {
@@ -43,7 +53,17 @@ export default function MultiSelect({ filter, multiple }: Props) {
         // searchPlaceholder="Search Colors"
         dialogCloseButtonText="Close"
         dialogDoneButtonText="Search"
+        // style={{ backgroundColor: "#ffffff" }}
+        // labelStyle={{ color: "red", fontWeight: "bold" }} // Style for the label
+        // inputStyle={{ padding: 160, borderColor: "gray", borderWidth: 1 }} // Style for the input
       />
     </View>
   );
 }
+
+// const styles = StyleSheet.create({
+//   paperSelect: {
+//     backgroundColor: "red",
+//     // opacity: 0,
+//   },
+// });

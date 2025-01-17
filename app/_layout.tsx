@@ -15,8 +15,10 @@ import { PaperProvider } from "react-native-paper";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useDimensions } from "@react-native-community/hooks";
+import utilities from "../tailwind.json";
+import { TailwindProvider } from "tailwind-rn";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -38,16 +40,18 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <QueryClientProvider client={queryClient}>
-        <PaperProvider>
-          <Stack>
-            {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-        </PaperProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <TailwindProvider utilities={utilities}>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <QueryClientProvider client={queryClient}>
+          <PaperProvider>
+            <Stack>
+              {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
+              <Stack.Screen name="+not-found" />
+            </Stack>
+            <StatusBar style="auto" />
+          </PaperProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </TailwindProvider>
   );
 }
