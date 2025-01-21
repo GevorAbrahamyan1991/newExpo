@@ -11,7 +11,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-
+  const shouldHideDiamondsTab = false;
   return (
     <Tabs
       screenOptions={{
@@ -37,7 +37,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="diamonds"
+        name="diamonds/index"
         options={{
           title: "Diamonds",
           tabBarIcon: ({ color }) => (
@@ -45,12 +45,13 @@ export default function TabLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
-        name="explore"
+        name="cart"
         options={{
-          title: "Explore",
+          title: "Cart",
           tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
+            <FontAwesome size={28} name="cart-plus" color={color} />
           ),
         }}
       />

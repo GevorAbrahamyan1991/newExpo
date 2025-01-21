@@ -18,12 +18,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useDimensions } from "@react-native-community/hooks";
 import utilities from "../tailwind.json";
 import { TailwindProvider } from "tailwind-rn";
+import { Button } from "react-native";
+import { Text } from "react-native";
+import DrawerToggleButton from "expo-router/drawer";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const queryClient = new QueryClient();
-
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
@@ -44,11 +46,15 @@ export default function RootLayout() {
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <QueryClientProvider client={queryClient}>
           <PaperProvider>
-            <Stack>
-              {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            <StatusBar style="auto" />
+            <DrawerToggleButton />
+            {/* <Stack>
+              <Stack.Screen
+                name="(tabs)"
+                options={{
+                  headerShown: false,
+                }}
+              />
+            </Stack> */}
           </PaperProvider>
         </QueryClientProvider>
       </ThemeProvider>
