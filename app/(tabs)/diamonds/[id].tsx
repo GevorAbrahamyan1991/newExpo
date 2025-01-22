@@ -11,33 +11,75 @@ export default function ID() {
   });
 
   return (
-    <View>
+    <View style={styles.container}>
       {isLoading ? (
-        <Text>Loading...</Text>
+        <Text style={styles.loadingText}>Loading...</Text>
+      ) : error ? (
+        <Text style={styles.errorText}>Error: {error.message}</Text>
       ) : (
-        <View>
+        data && (
           <View>
-            <Text className="text-center text-white font-normal py-4">
-              {data.carats} Carat {data.shape_code} Diamond {data.color_code}{" "}
-              Color {data.id}
-            </Text>
+            <View>
+              <Text style={styles.diamondInfo}>
+                {data.carats} Carat {data.shape_code} Diamond {data.color_code}{" "}
+                Color {data.id}
+              </Text>
+            </View>
+            <View style={styles.imageContainer}>
+              <Image
+                source={{
+                  uri: data.images?.[0],
+                }}
+                style={styles.image}
+                accessibilityLabel="Image Not Found"
+              />
+            </View>
+            <View>
+              <Text style={styles.priceText}>${data.price_total}</Text>
+            </View>
           </View>
-          <View className="flex justify-center items-center w-full text-white">
-            <Image
-              source={{
-                uri: data.images?.[0],
-              }}
-              className="h-64 w-full !max-w-[80%] border-2 border-white"
-              alt="Image Not Found"
-            />
-          </View>
-          <View>
-            <Text className="text-white font-bold text-lg text-center py-4">
-              ${data.price_total}
-            </Text>
-          </View>
-        </View>
+        )
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000", // Assuming a dark background
+  },
+  loadingText: {
+    color: "#fff",
+  },
+  errorText: {
+    color: "red",
+  },
+  diamondInfo: {
+    textAlign: "center",
+    color: "#fff",
+    fontWeight: "normal",
+    paddingVertical: 16,
+  },
+  imageContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  },
+  image: {
+    height: 256, // Adjusted height
+    width: "100%",
+    maxWidth: "80%",
+    borderWidth: 2,
+    borderColor: "#fff",
+  },
+  priceText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 18,
+    textAlign: "center",
+    paddingVertical: 16,
+  },
+});

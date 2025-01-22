@@ -31,10 +31,10 @@ export default function MultiSelect({ filter, multiple }: Props) {
   // };
 
   return (
-    <View className="" style={tailwind("")}>
+    <View className="">
       <PaperSelect
-        dialogStyle={tailwind("w-64 bg-red-900")}
-        textInputStyle={tailwind("w-64 bg-red-900 margin-auto")}
+        // dialogStyle={tailwind("w-64 bg-red-900")}
+        // textInputStyle={tailwind("w-64 bg-red-900 margin-auto")}
         // theme={{ colors: { primary: "red", secondary: "green" } }}
         label={`Select ${filter}`}
         value={Array.isArray(filters[filter]) ? filters[filter].join(", ") : ""}

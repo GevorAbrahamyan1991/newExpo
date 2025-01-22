@@ -65,7 +65,6 @@ export default function Card({ data }: Props) {
       <View>
         <Button
           onPress={() => handleAddToCart(data)}
-          style={tailwind("bg-red-900")}
           disabled={loadingItemId === data.id}
         >
           <Text>
