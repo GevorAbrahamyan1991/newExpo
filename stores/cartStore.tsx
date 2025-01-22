@@ -48,9 +48,17 @@ export const useCartStore = create<CartStore>()(
         })),
 
       removeCart: (id) =>
-        set((state) => ({
-          cart: state.cart.filter((cartItem) => cartItem.id !== id),
-        })),
+        set((state) => {
+          const cartIndex = state.cart.findIndex(
+            (cartItem) => cartItem.id === id
+          );
+          if (cartIndex !== -1) {
+            const newCart = [...state.cart];
+            newCart.splice(cartIndex, 1);
+            return { cart: newCart };
+          }
+          return state;
+        }),
 
       removeAll: () => set({ cart: [] }),
     }),
