@@ -80,12 +80,12 @@ export default function Cart() {
               </Text>
             </View>
 
-            {/* <Link
+            <Link
               href="/checkout"
               className="bg-white text-black p-2 text-center font-bold"
             >
               Checkout
-            </Link> */}
+            </Link>
           </View>
         </View>
       )}

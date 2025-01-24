@@ -28,7 +28,7 @@
     "@tanstack/react-query": "^4.36.1",
     "autoprefixer": "^10.4.20",
     "babel-preset-expo": "^12.0.5",
-    "expo": "~52.0.26",
+    "expo": "^52.0.27",
     "expo-blur": "~14.0.3",
     "expo-constants": "~17.0.4",
     "expo-font": "~13.0.3",

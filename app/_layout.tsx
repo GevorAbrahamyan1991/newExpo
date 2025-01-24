@@ -21,7 +21,7 @@ import { TailwindProvider } from "tailwind-rn";
 import { Button } from "react-native";
 import { Text } from "react-native";
 import DrawerToggleButton from "expo-router/drawer";
-
+import { StripeProvider } from "@stripe/stripe-react-native";
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -46,7 +46,9 @@ export default function RootLayout() {
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <QueryClientProvider client={queryClient}>
           <PaperProvider>
-            <DrawerToggleButton />
+            <StripeProvider publishableKey="pk_test_51QWyKtPCdJTxXoX1534gMXoqZftWDGikQKAcvSwp4Pd7JHX6N3LdKAQvUs0eabz288uZhpKjBZpgkn9Q2efzIgeH00AqxYDd9d">
+              <DrawerToggleButton />
+            </StripeProvider>
             {/* <Stack>
               <Stack.Screen
                 name="(tabs)"

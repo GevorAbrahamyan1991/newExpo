@@ -1,94 +1,76 @@
-// import React, { useEffect, useState } from "react";
-// import { View, Button, StyleSheet, Alert } from "react-native";
-// import { useStripe } from "@stripe/stripe-react-native";
-// import { useCartStore } from "@/stores/cartStore";
+import React, { useEffect, useState } from "react";
+import { Button, Alert } from "react-native";
+import {
+  initPaymentSheet,
+  presentPaymentSheet,
+} from "@stripe/stripe-react-native";
 
-// export default function Checkout() {
-//   const [loading, setLoading] = useState(false);
-//   const { initPaymentSheet, presentPaymentSheet } = useStripe();
-//   const cart = useCartStore.getState().cart;
+export default function Checkout() {
+  const [paymentSheetEnabled, setPaymentSheetEnabled] = useState(false);
 
-//   const fetchPaymentSheetParams = async () => {
-//     try {
-//       const formData = new FormData();
-//       formData.append("items", JSON.stringify(cart));
+  async function fetchPaymentSheetParams() {
+    try {
+      const response = await fetch(
+        "https://api.stripe.com/v1/payment_intents",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Bearer sk_test_51QWyKtPCdJTxXoX1Y5tIj7ZYZAZWY8FFHTQ2uU2JWsd9GutCV0Kpa6mnjsOcbWHTI4txQSyZdz8xRUU6jWiNfW4z00Wm6wk4OW`,
+          },
+          body: new URLSearchParams({
+            amount: (1000).toString(),
+            currency: "usd",
+            "payment_method_types[]": "card",
+          }).toString(),
+        }
+      );
 
-//       const response = await fetch(
-//         "http://localhost:3000/api/checkout_sessions",
-//         {
-//           method: "POST",
-//           headers: {
-//             "Content-Type": "application/json",
-//           },
-//           body: formData,
-//         }
-//       );
-//       const { clientSecret, publishableKey } = await response.json();
-//       return { clientSecret, publishableKey };
-//     } catch (error) {
-//       console.error("Error fetching payment sheet params:", error);
-//       return null;
-//     }
-//   };
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error.message);
+      }
 
-//   // Initialize the Payment Sheet
-//   const initializePaymentSheet = async () => {
-//     setLoading(true);
-//     const paymentSheetParams = await fetchPaymentSheetParams();
+      const { client_secret: clientSecret } = await response.json();
 
-//     if (!paymentSheetParams) {
-//       setLoading(false);
-//       Alert.alert("Error", "Failed to fetch payment sheet parameters");
-//       return;
-//     }
+      const { error } = await initPaymentSheet({
+        paymentIntentClientSecret: clientSecret,
+        merchantDisplayName: "Your Business Name",
+        country: "US",
+      });
 
-//     const { clientSecret, publishableKey } = paymentSheetParams;
+      if (error) {
+        console.error("initPaymentSheet error:", error.message);
+        Alert.alert("Error", "Failed to initialize payment sheet");
+        return;
+      }
 
-//     const initResponse = await initPaymentSheet({
-//       paymentIntentClientSecret: clientSecret,
-//       merchantDisplayName: "Your Store Name",
-//     });
+      setPaymentSheetEnabled(true);
+    } catch (error) {
+      console.error("Error fetching payment details:", error.message);
+      Alert.alert("Error", "An error occurred while fetching payment details");
+    }
+  }
 
-//     if (initResponse.error) {
-//       Alert.alert("Error", initResponse.error.message);
-//     }
-//     setLoading(false);
-//   };
+  useEffect(() => {
+    fetchPaymentSheetParams();
+  }, []);
 
-//   // Open the Payment Sheet
-//   const openPaymentSheet = async () => {
-//     if (loading) return;
+  async function openPaymentSheet() {
+    const { error } = await presentPaymentSheet();
 
-//     const { error } = await presentPaymentSheet();
+    if (error) {
+      Alert.alert("Payment failed", error.message);
+    } else {
+      Alert.alert("Payment successful", "Your payment was successful!");
+    }
+  }
 
-//     if (error) {
-//       Alert.alert("Payment failed", error.message);
-//     } else {
-//       Alert.alert("Success", "Your payment was confirmed!");
-//     }
-//   };
-
-//   useEffect(() => {
-//     initializePaymentSheet();
-//   }, []);
-
-//   return (
-//     <View style={styles.container}>
-//       <Button
-//         title="Checkout"
-//         onPress={openPaymentSheet}
-//         disabled={loading}
-//         color="#007AFF"
-//       />
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: "center",
-//     alignItems: "center",
-//     padding: 16,
-//   },
-// });
+  return (
+    <Button
+      title="Pay Now"
+      disabled={!paymentSheetEnabled}
+      onPress={openPaymentSheet}
+    />
+  );
+}
