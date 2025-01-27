@@ -47,16 +47,22 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <PaperProvider>
             <StripeProvider publishableKey="pk_test_51QWyKtPCdJTxXoX1534gMXoqZftWDGikQKAcvSwp4Pd7JHX6N3LdKAQvUs0eabz288uZhpKjBZpgkn9Q2efzIgeH00AqxYDd9d">
-              <DrawerToggleButton />
+              {/* <DrawerToggleButton /> */}
+              <Stack>
+                <Stack.Screen
+                  name="(tabs)"
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="result"
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+              </Stack>
             </StripeProvider>
-            {/* <Stack>
-              <Stack.Screen
-                name="(tabs)"
-                options={{
-                  headerShown: false,
-                }}
-              />
-            </Stack> */}
           </PaperProvider>
         </QueryClientProvider>
       </ThemeProvider>

@@ -1,16 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { Button, Alert, ScrollView } from "react-native";
+import { Button, Alert, ScrollView, Image, View, Text } from "react-native";
 import {
   initPaymentSheet,
   presentPaymentSheet,
 } from "@stripe/stripe-react-native";
 import { useCartStore } from "@/stores/cartStore";
+import { useNavigation } from "@react-navigation/native";
 
 export default function Checkout() {
   const [paymentSheetEnabled, setPaymentSheetEnabled] = useState(false);
+  const [paymentCompleted, setPaymentCompleted] = useState(false);
   const cart = useCartStore((state) => state.cart);
+  const removeAll = useCartStore.getState().removeAll;
+  const navigation = useNavigation();
+
+  const [x, setX] = useState("");
 
   async function fetchPaymentSheetParams() {
+    if (paymentCompleted) return;
     try {
       const totalAmount = cart.reduce(
         (total, item) => total + parseInt(item.price_total || 0, 10),
@@ -41,8 +48,9 @@ export default function Checkout() {
         throw new Error(error.error.message);
       }
 
-      const { client_secret: clientSecret } = await response.json();
-
+      const { id: sessionId, client_secret: clientSecret } =
+        await response.json();
+      setX(sessionId);
       const { error } = await initPaymentSheet({
         paymentIntentClientSecret: clientSecret,
         merchantDisplayName: "Your Business Name",
@@ -63,8 +71,10 @@ export default function Checkout() {
   }
 
   useEffect(() => {
-    fetchPaymentSheetParams();
-  }, [cart]);
+    if (!paymentCompleted) {
+      fetchPaymentSheetParams();
+    }
+  }, [cart, paymentCompleted]);
 
   async function openPaymentSheet() {
     const { error } = await presentPaymentSheet();
@@ -72,12 +82,54 @@ export default function Checkout() {
     if (error) {
       Alert.alert("Payment failed", error.message);
     } else {
-      Alert.alert("Payment successful", "Your payment was successful!");
+      setPaymentCompleted(true);
+      removeAll();
+
+      Alert.alert("Payment Successful", "Your payment was successful.");
+      if (paymentCompleted) {
+        navigation.navigate("result", x);
+      }
     }
   }
+  useEffect(() => {
+    if (paymentCompleted && cart.length > 0) {
+      setPaymentCompleted(false);
+    }
+  }, [cart, paymentCompleted]);
 
   return (
     <ScrollView>
+      <View className="px-6 mb-8">
+        <View className="flex flex-col gap-y-8">
+          {cart.length > 0 &&
+            cart.map((item, index) => {
+              return (
+                <View
+                  key={index}
+                  className="border border-white/50 flex flex-row"
+                >
+                  <View className="w-1/2 flex justify-center items-center">
+                    <Image
+                      source={{
+                        uri: item.images?.[0],
+                      }}
+                      className="h-24 w-24 !max-w-[80%]"
+                      alt="Image Not Found"
+                    />
+                  </View>
+                  <View className="w-1/2 flex flex-col justify-center items-centert">
+                    <Text className=" text-white font-normal text-center">
+                      {item.carats} {item.shape_code} {item.color_code}
+                    </Text>
+                    <Text className="text-white font-bold text-xl text-center">
+                      $ {item.price_total}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+        </View>
+      </View>
       <Button
         title="Pay Now"
         disabled={!paymentSheetEnabled}
