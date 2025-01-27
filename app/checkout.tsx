@@ -8,7 +8,7 @@ import { useCartStore } from "@/stores/cartStore";
 
 export default function Checkout() {
   const [paymentSheetEnabled, setPaymentSheetEnabled] = useState(false);
-  const cart = useCartStore.getState().cart;
+  const cart = useCartStore((state) => state.cart);
 
   async function fetchPaymentSheetParams() {
     try {
@@ -17,11 +17,10 @@ export default function Checkout() {
         0
       );
 
-      // Ensure you calculate the totalAmount in cents (Stripe uses cents for USD)
       const amountInCents = totalAmount * 100;
 
       const formData = new URLSearchParams();
-      formData.append("amount", amountInCents.toString()); // Total amount in cents
+      formData.append("amount", amountInCents.toString());
       formData.append("currency", "usd");
       formData.append("payment_method_types[]", "card");
 
@@ -65,7 +64,7 @@ export default function Checkout() {
 
   useEffect(() => {
     fetchPaymentSheetParams();
-  }, []);
+  }, [cart]);
 
   async function openPaymentSheet() {
     const { error } = await presentPaymentSheet();

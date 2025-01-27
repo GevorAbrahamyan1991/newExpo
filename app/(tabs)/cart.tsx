@@ -6,10 +6,10 @@ import { Button } from "react-native";
 import { Link } from "expo-router";
 
 export default function Cart() {
-  const cart = useCartStore((state) => state.cart);
-  const { removeCart } = useCartStore();
+  const cart = useCartStore.getState().cart;
+
   const [totalPrice, setTotalPrice] = useState(0);
-  const { removeAll } = useCartStore();
+  const { removeAll, removeCart } = useCartStore();
 
   const handleRemoveToCart = (item) => {
     removeCart(item.id);
