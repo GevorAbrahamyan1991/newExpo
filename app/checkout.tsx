@@ -1,15 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { Button, Alert } from "react-native";
+import { Button, Alert, ScrollView } from "react-native";
 import {
   initPaymentSheet,
   presentPaymentSheet,
 } from "@stripe/stripe-react-native";
+import { useCartStore } from "@/stores/cartStore";
 
 export default function Checkout() {
   const [paymentSheetEnabled, setPaymentSheetEnabled] = useState(false);
+  const cart = useCartStore.getState().cart;
 
   async function fetchPaymentSheetParams() {
     try {
+      const totalAmount = cart.reduce(
+        (total, item) => total + parseInt(item.price_total || 0, 10),
+        0
+      );
+
+      // Ensure you calculate the totalAmount in cents (Stripe uses cents for USD)
+      const amountInCents = totalAmount * 100;
+
+      const formData = new URLSearchParams();
+      formData.append("amount", amountInCents.toString()); // Total amount in cents
+      formData.append("currency", "usd");
+      formData.append("payment_method_types[]", "card");
+
       const response = await fetch(
         "https://api.stripe.com/v1/payment_intents",
         {
@@ -18,11 +33,7 @@ export default function Checkout() {
             "Content-Type": "application/x-www-form-urlencoded",
             Authorization: `Bearer sk_test_51QWyKtPCdJTxXoX1Y5tIj7ZYZAZWY8FFHTQ2uU2JWsd9GutCV0Kpa6mnjsOcbWHTI4txQSyZdz8xRUU6jWiNfW4z00Wm6wk4OW`,
           },
-          body: new URLSearchParams({
-            amount: (1000).toString(),
-            currency: "usd",
-            "payment_method_types[]": "card",
-          }).toString(),
+          body: formData.toString(),
         }
       );
 
@@ -67,10 +78,12 @@ export default function Checkout() {
   }
 
   return (
-    <Button
-      title="Pay Now"
-      disabled={!paymentSheetEnabled}
-      onPress={openPaymentSheet}
-    />
+    <ScrollView>
+      <Button
+        title="Pay Now"
+        disabled={!paymentSheetEnabled}
+        onPress={openPaymentSheet}
+      />
+    </ScrollView>
   );
 }
