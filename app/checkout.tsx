@@ -1,94 +1,141 @@
-// import React, { useEffect, useState } from "react";
-// import { View, Button, StyleSheet, Alert } from "react-native";
-// import { useStripe } from "@stripe/stripe-react-native";
-// import { useCartStore } from "@/stores/cartStore";
+import React, { useEffect, useState } from "react";
+import { Button, Alert, ScrollView, Image, View, Text } from "react-native";
+import {
+  initPaymentSheet,
+  presentPaymentSheet,
+} from "@stripe/stripe-react-native";
+import { useCartStore } from "@/stores/cartStore";
+import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 
-// export default function Checkout() {
-//   const [loading, setLoading] = useState(false);
-//   const { initPaymentSheet, presentPaymentSheet } = useStripe();
-//   const cart = useCartStore.getState().cart;
+export default function Checkout() {
+  const [paymentSheetEnabled, setPaymentSheetEnabled] = useState(false);
+  const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const cart = useCartStore((state) => state.cart);
+  const removeAll = useCartStore.getState().removeAll;
+  const navigation = useNavigation();
 
-//   const fetchPaymentSheetParams = async () => {
-//     try {
-//       const formData = new FormData();
-//       formData.append("items", JSON.stringify(cart));
+  const [x, setX] = useState("");
 
-//       const response = await fetch(
-//         "http://localhost:3000/api/checkout_sessions",
-//         {
-//           method: "POST",
-//           headers: {
-//             "Content-Type": "application/json",
-//           },
-//           body: formData,
-//         }
-//       );
-//       const { clientSecret, publishableKey } = await response.json();
-//       return { clientSecret, publishableKey };
-//     } catch (error) {
-//       console.error("Error fetching payment sheet params:", error);
-//       return null;
-//     }
-//   };
+  async function fetchPaymentSheetParams() {
+    if (paymentCompleted) return;
+    try {
+      const totalAmount = cart.reduce(
+        (total, item) => total + parseInt(item.price_total || 0, 10),
+        0
+      );
 
-//   // Initialize the Payment Sheet
-//   const initializePaymentSheet = async () => {
-//     setLoading(true);
-//     const paymentSheetParams = await fetchPaymentSheetParams();
+      const amountInCents = totalAmount * 100;
 
-//     if (!paymentSheetParams) {
-//       setLoading(false);
-//       Alert.alert("Error", "Failed to fetch payment sheet parameters");
-//       return;
-//     }
+      const formData = new URLSearchParams();
+      formData.append("amount", amountInCents.toString());
+      formData.append("currency", "usd");
+      formData.append("payment_method_types[]", "card");
 
-//     const { clientSecret, publishableKey } = paymentSheetParams;
+      const response = await fetch(
+        "https://api.stripe.com/v1/payment_intents",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Bearer sk_test_51QWyKtPCdJTxXoX1Y5tIj7ZYZAZWY8FFHTQ2uU2JWsd9GutCV0Kpa6mnjsOcbWHTI4txQSyZdz8xRUU6jWiNfW4z00Wm6wk4OW`,
+          },
+          body: formData.toString(),
+        }
+      );
 
-//     const initResponse = await initPaymentSheet({
-//       paymentIntentClientSecret: clientSecret,
-//       merchantDisplayName: "Your Store Name",
-//     });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error.message);
+      }
 
-//     if (initResponse.error) {
-//       Alert.alert("Error", initResponse.error.message);
-//     }
-//     setLoading(false);
-//   };
+      const { id: sessionId, client_secret: clientSecret } =
+        await response.json();
+      setX(sessionId);
+      const { error } = await initPaymentSheet({
+        paymentIntentClientSecret: clientSecret,
+        merchantDisplayName: "Your Business Name",
+        country: "US",
+      });
 
-//   // Open the Payment Sheet
-//   const openPaymentSheet = async () => {
-//     if (loading) return;
+      if (error) {
+        console.error("initPaymentSheet error:", error.message);
+        Alert.alert("Error", "Failed to initialize payment sheet");
+        return;
+      }
 
-//     const { error } = await presentPaymentSheet();
+      setPaymentSheetEnabled(true);
+    } catch (error) {
+      console.error("Error fetching payment details:", error.message);
+      Alert.alert("Error", "An error occurred while fetching payment details");
+    }
+  }
 
-//     if (error) {
-//       Alert.alert("Payment failed", error.message);
-//     } else {
-//       Alert.alert("Success", "Your payment was confirmed!");
-//     }
-//   };
+  useEffect(() => {
+    if (!paymentCompleted) {
+      fetchPaymentSheetParams();
+    }
+  }, [cart, paymentCompleted]);
 
-//   useEffect(() => {
-//     initializePaymentSheet();
-//   }, []);
+  async function openPaymentSheet() {
+    const { error } = await presentPaymentSheet();
 
-//   return (
-//     <View style={styles.container}>
-//       <Button
-//         title="Checkout"
-//         onPress={openPaymentSheet}
-//         disabled={loading}
-//         color="#007AFF"
-//       />
-//     </View>
-//   );
-// }
+    if (error) {
+      Alert.alert("Payment failed", error.message);
+    } else {
+      setPaymentCompleted(true);
+      removeAll();
+      router.push({ pathname: "/result", params: { x } });
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     justifyContent: "center",
-//     alignItems: "center",
-//     padding: 16,
-//   },
-// });
+      Alert.alert("Payment Successful", "Your payment was successful.");
+      // if (paymentCompleted) {
+      // }
+    }
+  }
+  useEffect(() => {
+    if (paymentCompleted && cart.length > 0) {
+      setPaymentCompleted(false);
+    }
+  }, [cart, paymentCompleted]);
+
+  return (
+    <ScrollView>
+      <View className="px-6 mb-8">
+        <View className="flex flex-col gap-y-8">
+          {cart.length > 0 &&
+            cart.map((item, index) => {
+              return (
+                <View
+                  key={index}
+                  className="border border-white/50 flex flex-row"
+                >
+                  <View className="w-1/2 flex justify-center items-center">
+                    <Image
+                      source={{
+                        uri: item.images?.[0],
+                      }}
+                      className="h-24 w-24 !max-w-[80%]"
+                      alt="Image Not Found"
+                    />
+                  </View>
+                  <View className="w-1/2 flex flex-col justify-center items-centert">
+                    <Text className=" text-white font-normal text-center">
+                      {item.carats} {item.shape_code} {item.color_code}
+                    </Text>
+                    <Text className="text-white font-bold text-xl text-center">
+                      $ {item.price_total}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+        </View>
+      </View>
+      {/* <Button
+        title="Pay Now"
+        disabled={!paymentSheetEnabled}
+        onPress={openPaymentSheet}
+      /> */}
+    </ScrollView>
+  );
+}
