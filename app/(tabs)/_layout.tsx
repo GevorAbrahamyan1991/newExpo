@@ -23,6 +23,12 @@ export default function TabLayout() {
           ios: {
             position: "absolute",
           },
+          android: {
+            position: "absolute",
+            zIndex: 9999,
+            bottom: 0,
+            height: 80,
+          },
           default: {},
         }),
       }}
@@ -50,6 +56,8 @@ export default function TabLayout() {
         name="cart"
         options={{
           title: "Cart",
+          // tabBarButton: () => null,
+          tabBarShowLabel: false,
           tabBarIcon: ({ color }) => (
             <FontAwesome size={28} name="cart-plus" color={color} />
           ),

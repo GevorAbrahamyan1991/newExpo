@@ -6,6 +6,7 @@ import {
 } from "@stripe/stripe-react-native";
 import { useCartStore } from "@/stores/cartStore";
 import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 
 export default function Checkout() {
   const [paymentSheetEnabled, setPaymentSheetEnabled] = useState(false);
@@ -84,11 +85,11 @@ export default function Checkout() {
     } else {
       setPaymentCompleted(true);
       removeAll();
+      router.push({ pathname: "/result", params: { x } });
 
       Alert.alert("Payment Successful", "Your payment was successful.");
-      if (paymentCompleted) {
-        navigation.navigate("result", x);
-      }
+      // if (paymentCompleted) {
+      // }
     }
   }
   useEffect(() => {
@@ -130,11 +131,11 @@ export default function Checkout() {
             })}
         </View>
       </View>
-      <Button
+      {/* <Button
         title="Pay Now"
         disabled={!paymentSheetEnabled}
         onPress={openPaymentSheet}
-      />
+      /> */}
     </ScrollView>
   );
 }

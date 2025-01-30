@@ -5,6 +5,7 @@ import { Key } from "react";
 import useStore from "@/stores/store";
 
 import MultiSelect from "@/components/search/MultiSelect";
+import { Link } from "expo-router";
 
 export const selectValidator = (value: any) => {
   if (!value || value.length <= 0) {
@@ -30,7 +31,12 @@ export default function Diamonds() {
             <Text className="bg-slate-800 py-8 text-white text-center text-3xl">
               Diamonds
             </Text>
-
+            <Link
+              href="/(tabs)/cart"
+              className="text-blue-600 text-2xl text-center p-2"
+            >
+              Home
+            </Link>
             <MultiSelect filter="shape" multiple={true} />
             <MultiSelect filter="color" multiple={false} />
             <View style={styles.container}>
